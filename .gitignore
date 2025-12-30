@@ -67,3 +67,13 @@ target/
 
 # Kotlin compiled files
 *.class
+
+# Claude Code generated files
+claudedocs/
+.claude/
+claude-*.md
+claude-*.txt
+claude-*.json
+*.claude-temp
+*-claude-backup.*
+claude-session-*.log
