@@ -39,8 +39,19 @@ dependencies {
 
     runtimeOnly("com.h2database:h2")
 
+    // Spring Boot test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // Kotest framework
+    testImplementation("io.kotest:kotest-runner-junit5:6.0.7")
+    testImplementation("io.kotest:kotest-assertions-core:6.0.7")
+    testImplementation("io.kotest:kotest-extensions-spring:6.0.7")
+
+    // Kotlin mocking
+    testImplementation("io.mockk:mockk:1.14.7")
+    testImplementation("com.ninja-squad:springmockk:5.0.1")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
