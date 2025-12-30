@@ -52,6 +52,9 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.7")
     testImplementation("com.ninja-squad:springmockk:5.0.1")
 
+    // Fixture Monkey
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter-kotlin:1.1.15")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
