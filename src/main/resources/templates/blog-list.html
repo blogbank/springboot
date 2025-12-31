@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그적금</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .modal {
+            display: none;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: rgb(59, 130, 246);
+        }
+
+        .card:hover .card-title {
+            color: rgb(59, 130, 246);
+        }
+
+        .card:hover .card-icon {
+            background-color: rgb(239, 246, 255);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="loading" class="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-8 h-8 mx-auto mb-4 animate-spin text-blue-600 text-2xl">⟳</div>
+            <p class="text-gray-600">블로그 게시글을 불러오는 중...</p>
+        </div>
+    </div>
+
+    <div id="error" class="min-h-screen bg-gray-50 flex items-center justify-center" style="display: none;">
+        <div class="text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-2xl">✕</div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">오류가 발생했습니다</h2>
+            <p id="error-message" class="text-gray-600 mb-4"></p>
+            <button onclick="loadData()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                다시 시도
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div class="max-w-4xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">블로그적금</h1>
+                        <p id="total-count" class="text-sm text-gray-500 mt-1">총 0명</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">게시글</div>
+                        <div id="posts-count" class="text-lg font-semibold text-blue-600">0개</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4 py-8">
+            <div id="posts-section">
+                <h2 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                    <span class="mr-2 text-blue-600">📝</span>
+                    최근 게시글
+                </h2>
+                <div id="posts-container" class="grid gap-4">
+                </div>
+            </div>
+
+            <div id="authors-section" style="display: none;">
+                <h2 class="text-lg font-semibold text-gray-800 mb-6 flex items-center mt-12">
+                    <span class="mr-2 text-gray-400">👥</span>
+                    작성 중
+                </h2>
+                <div id="authors-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="webview-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-5xl h-[80vh] overflow-hidden shadow-2xl">
+            <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div id="modal-avatar" class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium"></div>
+                    <div class="ml-3">
+                        <h3 id="modal-author" class="font-semibold text-gray-900"></h3>
+                        <p id="modal-title" class="text-sm text-gray-500 truncate max-w-md"></p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors text-gray-600">
+                    ✕
+                </button>
+            </div>
+            <div class="h-full pb-20">
+                <iframe id="modal-iframe" class="w-full h-full border-0" sandbox="allow-same-origin allow-scripts allow-forms allow-links"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let blogData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+
+        function loadData() {
+            showLoading();
+
+            fetch('/api/blog-posts')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    blogData = data;
+                    renderPage();
+                })
+                .catch(function(error) {
+                    showError(error.message || '데이터를 불러오는 중 오류가 발생했습니다.');
+                });
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('main-content').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'flex';
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function renderPage() {
+            if (!blogData) return;
+
+            var postsWithContent = blogData.posts.filter(function(post) {
+                return post.title && post.link;
+            });
+
+            var postsWithoutContent = blogData.posts.filter(function(post) {
+                return !post.title || !post.link;
+            });
+
+            document.getElementById('total-count').textContent = '총 ' + blogData.totalCount + '명의 개발자';
+            document.getElementById('posts-count').textContent = postsWithContent.length + '개';
+
+            renderPosts(postsWithContent);
+
+            if (postsWithoutContent.length > 0) {
+                renderAuthors(postsWithoutContent);
+                document.getElementById('authors-section').style.display = 'block';
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function renderPosts(posts) {
+            var container = document.getElementById('posts-container');
+            container.innerHTML = '';
+
+            posts.forEach(function(post) {
+                var postCard = createPostCard(post);
+                container.appendChild(postCard);
+            });
+        }
+
+        function renderAuthors(authors) {
+            var container = document.getElementById('authors-container');
+            container.innerHTML = '';
+
+            authors.forEach(function(author) {
+                var authorCard = createAuthorCard(author);
+                container.appendChild(authorCard);
+            });
+        }
+
+        function createPostCard(post) {
+            var div = document.createElement('div');
+            div.className = 'card bg-white rounded-2xl p-6 shadow-sm border border-gray-100 transition-all duration-300 cursor-pointer';
+            div.onclick = function() { openModal(post); };
+
+            div.innerHTML =
+                '<div class="flex items-start justify-between">' +
+                    '<div class="flex-1">' +
+                        '<div class="flex items-center mb-3">' +
+                            '<div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">' +
+                                post.authorName.charAt(0) +
+                            '</div>' +
+                            '<div class="ml-3">' +
+                                '<p class="font-medium text-gray-900">' + post.authorName + '</p>' +
+                                '<p class="text-sm text-gray-500">#' + post.sequenceNumber + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<h3 class="card-title text-lg font-semibold text-gray-900 mb-2 transition-colors line-clamp-2">' +
+                            post.title +
+                        '</h3>' +
+                        (post.memo ? '<p class="text-sm text-gray-600 mb-3">' + post.memo + '</p>' : '') +
+                        '<div class="flex items-center text-sm text-blue-600">' +
+                            '<span class="mr-1">🔗</span>' +
+                            '<span>글 읽기</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="ml-4">' +
+                        '<div class="card-icon w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center transition-colors text-xl">' +
+                            '📄' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            return div;
+        }
+
+        function createAuthorCard(author) {
+            var div = document.createElement('div');
+            div.className = 'bg-white rounded-xl p-4 shadow-sm border border-gray-100';
+
+            div.innerHTML =
+                '<div class="flex items-center">' +
+                    '<div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 text-sm font-medium">' +
+                        author.authorName.charAt(0) +
+                    '</div>' +
+                    '<div class="ml-3 flex-1">' +
+                        '<p class="font-medium text-gray-700 text-sm">' + author.authorName + '</p>' +
+                        '<p class="text-xs text-gray-400">#' + author.sequenceNumber + '</p>' +
+                    '</div>' +
+                '</div>';
+
+            return div;
+        }
+
+        function openModal(post) {
+            if (!post.link || !post.title) return;
+
+            document.getElementById('modal-avatar').textContent = post.authorName.charAt(0);
+            document.getElementById('modal-author').textContent = post.authorName;
+            document.getElementById('modal-title').textContent = post.title;
+            document.getElementById('modal-iframe').src = post.link;
+            document.getElementById('webview-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('webview-modal').classList.remove('active');
+            document.getElementById('modal-iframe').src = '';
+        }
+    </script>
+</body>
+</html>
