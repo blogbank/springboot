@@ -34,9 +34,9 @@ class BlogPostManager(
 
         if (gitHubFile == null) return emptyList()
 
-        val cleanedBase64 = gitHubFile.content.replace("\n", "").replace("\r", "").replace(" ", "")
-        val decodedContent = String(Base64.getDecoder().decode(cleanedBase64))
-        return blogPostExtractor.parseMarkdownTable(decodedContent)
+        // 파싱된 데이터를 BlogPostDto로 변환
+        val parsedData = blogPostExtractor.parseMarkdownTable(gitHubFile.content)
+        return blogPostManagerMapper.toDtoListFromParsedData(parsedData, roundNumber)
     }
 
     // 블로그 포스트를 저장함

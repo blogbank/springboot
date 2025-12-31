@@ -9,6 +9,7 @@ class BlogPostManagerMapper {
 
     fun toEntity(dto: BlogPostDto): BlogPostEntity {
         return BlogPostEntity(
+            roundNumber = dto.roundNumber,
             sequenceNumber = dto.sequenceNumber,
             authorName = dto.authorName,
             title = dto.title,
@@ -23,6 +24,7 @@ class BlogPostManagerMapper {
 
     fun toDto(entity: BlogPostEntity): BlogPostDto {
         return BlogPostDto(
+            roundNumber = entity.roundNumber,
             sequenceNumber = entity.sequenceNumber,
             authorName = entity.authorName,
             title = entity.title,
@@ -33,5 +35,22 @@ class BlogPostManagerMapper {
 
     fun toDtoList(entities: List<BlogPostEntity>): List<BlogPostDto> {
         return entities.map { entity -> toDto(entity) }
+    }
+
+    // ParsedBlogPostData를 BlogPostDto로 변환함
+    fun toDto(parsedData: ParsedBlogPostData, roundNumber: Int): BlogPostDto {
+        return BlogPostDto(
+            roundNumber = roundNumber,
+            sequenceNumber = parsedData.sequenceNumber,
+            authorName = parsedData.authorName,
+            title = parsedData.title,
+            link = parsedData.link,
+            memo = parsedData.memo
+        )
+    }
+
+    // ParsedBlogPostData 리스트를 BlogPostDto 리스트로 변환함
+    fun toDtoListFromParsedData(parsedDataList: List<ParsedBlogPostData>, roundNumber: Int): List<BlogPostDto> {
+        return parsedDataList.map { parsedData -> toDto(parsedData, roundNumber) }
     }
 }

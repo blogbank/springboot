@@ -1,6 +1,6 @@
 package com.blogbank.blogbankback.domain.blogpost.business
 
-import com.blogbank.blogbankback.domain.blogpost.dto.BlogPostDto
+import com.blogbank.blogbankback.util.Base64Utils
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,8 +16,12 @@ class BlogPostExtractor {
         private const val MEMO_COLUMN = 4
     }
 
-    fun parseMarkdownTable(content: String): List<BlogPostDto> {
-        val lines = content.split("\n")
+    fun parseMarkdownTable(base64Content: String): List<ParsedBlogPostData> {
+
+        // base64 디코딩
+        val decodedContent = Base64Utils.decodeGitHubContent(base64Content)
+
+        val lines = decodedContent.split("\n")
         val tableStartIndex = findTableStart(lines) ?: return emptyList()
         val tableLines = extractTableLines(lines, tableStartIndex)
 
@@ -37,12 +41,12 @@ class BlogPostExtractor {
     private fun isSeparatorLine(line: String): Boolean =
         line.matches(SEPARATOR_PATTERN)
 
-    private fun parseTableData(lines: List<String>): List<BlogPostDto> =
+    private fun parseTableData(lines: List<String>): List<ParsedBlogPostData> =
         lines.mapIndexedNotNull { index, line ->
             parseTableRow(line, index + 1)
         }
 
-    private fun parseTableRow(line: String, sequenceNumber: Int): BlogPostDto? {
+    private fun parseTableRow(line: String, sequenceNumber: Int): ParsedBlogPostData? {
         val columns = line.split("|").map { it.trim() }
 
         if (columns.size < MIN_COLUMNS) return null
@@ -52,7 +56,7 @@ class BlogPostExtractor {
         val memo = columns[MEMO_COLUMN].takeIf { it.isNotEmpty() }
         val (blogTitle, blogLink) = extractTitleAndLink(title)
 
-        return BlogPostDto(
+        return ParsedBlogPostData(
             sequenceNumber = sequenceNumber,
             authorName = authorName,
             title = blogTitle,
