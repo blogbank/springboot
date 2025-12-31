@@ -5,6 +5,7 @@ import com.blogbank.blogbankback.domain.blogpost.repository.BlogPostRepository
 import com.blogbank.blogbankback.domain.github.client.GitHubClient
 import com.blogbank.blogbankback.util.base.BaseIntegrationTest
 import com.blogbank.blogbankback.util.fixture.BlogPostFixture
+import com.blogbank.blogbankback.util.fixture.GitHubClientMockResponses
 import com.blogbank.blogbankback.util.router.BlogPostRouter
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -24,6 +25,8 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
     @Autowired
     private lateinit var blogPostFixture: BlogPostFixture
 
+    private val gitHubClientMockResponses = GitHubClientMockResponses()
+
     init {
         given("BlogPost API 통합테스트") {
 
@@ -42,18 +45,23 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
             }
 
             `when`("POST /api/blog-posts/rounds/{roundNumber} 호출하면") {
-                then("해당 라운드의 블로그 포스트 목록을 반환한다 (GitHub 응답이 없으면 빈 목록)") {
+                then("해당 라운드의 블로그 포스트 목록을 반환한다") {
                     // Given
                     val roundNumber = Random.nextInt(1, 100)
                     val uri = BlogPostRouter.getRound(roundNumber)
+                    val mockResponse = gitHubClientMockResponses.getRandomResponse()
 
-                    coEvery { gitHubClient.getFileContent(any()) } returns null
+                    // GitHubClient Response Mocking (랜덤 응답 반환)
+                    coEvery { gitHubClient.getFileContent(any()) } returns mockResponse
 
                     // When & Then
                     httpClient.postOkResponse<BlogPostListResponseDto>(uri) { body ->
-
-                        body.posts shouldHaveSize 0
-                        body.totalCount shouldBe 0
+                        if (mockResponse == null) {
+                            body.posts shouldHaveSize 0
+                            body.totalCount shouldBe 0
+                        } else {
+                            body.totalCount shouldBe body.posts.size
+                        }
                     }
                 }
             }
