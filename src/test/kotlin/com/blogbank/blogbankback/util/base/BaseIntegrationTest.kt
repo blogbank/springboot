@@ -1,7 +1,7 @@
 package com.blogbank.blogbankback.util.base
 
 import com.blogbank.blogbankback.util.client.HttpRequestClient
-import io.kotest.core.spec.style.StringSpec
+import io.kotest.core.spec.style.BehaviorSpec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -11,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
-abstract class BaseIntegrationTest(body: StringSpec.() -> Unit = {}) : StringSpec({
-    body()
-}) {
+abstract class BaseIntegrationTest : BehaviorSpec() {
 
     @Autowired
     private lateinit var webTestClient: WebTestClient
