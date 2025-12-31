@@ -7,6 +7,7 @@ import com.blogbank.blogbankback.domain.blogpost.entity.BlogPostEntity
 import com.blogbank.blogbankback.domain.github.client.GitHubClient
 import com.blogbank.blogbankback.domain.blogpost.business.BlogPostExtractor
 import com.blogbank.blogbankback.domain.blogpost.repository.BlogPostCacheRepository
+import com.blogbank.blogbankback.util.ResponseUtils
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 
@@ -70,8 +71,9 @@ class BlogPostManager(
     // 비동기로 블로그 포스트를 수집함
     private suspend fun collectBlogPostsAsync(roundNumber: Int): List<BlogPostDto> {
         val fileName = String.format(FILE_NAME_PATTERN, roundNumber)
-        val gitHubFile = gitHubClient.getFileContent(fileName)
+        val response = gitHubClient.getFileContent(fileName)
 
+        val gitHubFile = ResponseUtils.getBodyOrNull(response)
         if (gitHubFile == null) return emptyList()
 
         // 파싱된 데이터를 BlogPostDto로 변환
