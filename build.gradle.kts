@@ -40,6 +40,10 @@ dependencies {
 
     runtimeOnly("com.h2database:h2")
 
+    // Caffeine Cache
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     // Spring Boot test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")

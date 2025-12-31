@@ -15,20 +15,13 @@ class BlogPostService(
 ) {
 
     fun getBlogPostsForRound(roundNumber: Int): BlogPostListResponseDto {
-
-        val savedPosts = getAndSaveBlogPosts(roundNumber)
+        val savedPosts = blogPostManager.getBlogPostsWithCache(roundNumber)
         return blogPostMapper.toListResponse(savedPosts)
+
     }
 
     fun getAllBlogPosts(): BlogPostListResponseDto {
         val posts = blogPostManager.getAll()
         return blogPostMapper.toListResponse(posts)
-    }
-
-    private fun getAndSaveBlogPosts(roundNumber: Int): List<BlogPostEntity> {
-
-        val blogPosts = blogPostManager.collectBlogPosts(roundNumber)
-        return blogPostManager.saveAll(blogPosts)
-
     }
 }

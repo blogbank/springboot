@@ -11,6 +11,7 @@ class BlogPostMapper {
     // BlogPostEntity를 BlogPostDto로 변환함
     private fun toDto(entity: BlogPostEntity): BlogPostDto {
         return BlogPostDto(
+            roundNumber = entity.roundNumber,
             sequenceNumber = entity.sequenceNumber,
             authorName = entity.authorName,
             title = entity.title,
