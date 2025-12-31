@@ -8,11 +8,11 @@ import org.springframework.test.context.ActiveProfiles
 
 @ActiveProfiles("test")
 @ExtendWith(MockKExtension::class)
-abstract class BaseUnitTest(body: BehaviorSpec.() -> Unit = {}) : BehaviorSpec({
+abstract class BaseUnitTest : BehaviorSpec() {
 
-    afterEach { (testCase, testResult) ->
-        clearAllMocks() // 테스트 완료 후 모든 Mock 초기화
+    init {
+        afterEach { (testCase, testResult) ->
+            clearAllMocks() // 테스트 완료 후 모든 Mock 초기화
+        }
     }
-
-    body()
-})
+}
