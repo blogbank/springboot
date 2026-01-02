@@ -24,8 +24,8 @@ class BlogPostManager(
         private const val FILE_NAME_PATTERN = "round%02d.md"
     }
 
-    // 블로그 포스트를 수집함
-    fun collectBlogPosts(roundNumber: Int): List<BlogPostDto> = runBlocking {
+    // 블로그 포스트를 수집함 ( 요청 실패 시 반환 값 null, 실제 데이터가 없을 시 emptyList 반환)
+    fun collectBlogPosts(roundNumber: Int): List<BlogPostDto>? = runBlocking {
         collectBlogPostsAsync(roundNumber)
     }
 
@@ -69,12 +69,12 @@ class BlogPostManager(
      */
 
     // 비동기로 블로그 포스트를 수집함
-    private suspend fun collectBlogPostsAsync(roundNumber: Int): List<BlogPostDto> {
+    private suspend fun collectBlogPostsAsync(roundNumber: Int): List<BlogPostDto>? {
         val fileName = String.format(FILE_NAME_PATTERN, roundNumber)
         val response = gitHubClient.getFileContent(fileName)
 
         val gitHubFile = ResponseUtils.getBodyOrNull(response)
-        if (gitHubFile == null) return emptyList()
+        if (gitHubFile == null) return null // API 요청에 실패했을 때
 
         // 파싱된 데이터를 BlogPostDto로 변환
         val parsedData = blogPostExtractor.parseMarkdownTable(gitHubFile.content)
@@ -84,7 +84,7 @@ class BlogPostManager(
     // GitHub에서 데이터를 수집하여 저장함
     private fun fetchAndSaveFromProvider(roundNumber: Int): List<BlogPostEntity> {
         val blogPosts = collectBlogPosts(roundNumber)
-        if (blogPosts.isEmpty()) return emptyList()
+        if (blogPosts == null) return emptyList()  // API 요청에 실패했을 때
 
         val entities = blogPostManagerMapper.toEntityList(blogPosts)
         return upsertBlogPost(roundNumber, entities)
