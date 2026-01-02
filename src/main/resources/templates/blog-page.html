@@ -554,7 +554,7 @@
             } else {
                 // 특정 라운드 데이터 조회
                 apiUrl = '/api/blog-posts/rounds/' + roundNumber;
-                fetchOptions.method = 'POST';
+                fetchOptions.method = 'GET';
             }
 
             fetch(apiUrl, fetchOptions)

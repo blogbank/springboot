@@ -44,7 +44,7 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
                 }
             }
 
-            `when`("POST /api/blog-posts/rounds/{roundNumber} 호출하면") {
+            `when`("GET /api/blog-posts/rounds/{roundNumber} 호출하면") {
                 then("해당 라운드의 블로그 포스트 목록을 반환한다") {
                     // Given
                     val roundNumber = Random.nextInt(1, 100)
@@ -55,7 +55,7 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
                     coEvery { gitHubClient.getFileContent(any()) } returns mockResponse
 
                     // When & Then
-                    httpClient.postOkResponse<BlogPostListResponseDto>(uri) { body ->
+                    httpClient.getOkResponse<BlogPostListResponseDto>(uri) { body ->
                         if (!mockResponse.isSuccessful) {
                             body.posts shouldHaveSize 0
                             body.totalCount shouldBe 0
