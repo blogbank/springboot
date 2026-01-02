@@ -16,10 +16,10 @@ class BlogPostRepositoryTest(
         given("블로그 포스트 여러 개가 저장되어 있을 때") {
             `when`("순서번호 오름차순으로 조회하면") {
                 then("정렬되어 반환된다") {
-                    val blogPosts = blogPostFixture.createRandomListAtLeastOne()
+                    val blogPosts = blogPostFixture.createUniqueRandomListAtLeastOne()
                     val savedPosts = blogPostRepository.saveAll(blogPosts)
 
-                    val result = blogPostRepository.findAllByOrderBySequenceNumberAsc()
+                    val result = blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
 
                     result shouldHaveSize savedPosts.size
                     val sortedPosts = savedPosts.sortedBy { it.sequenceNumber }
@@ -37,7 +37,7 @@ class BlogPostRepositoryTest(
         given("블로그 포스트가 없을 때") {
             `when`("순서번호 오름차순으로 조회하면") {
                 then("빈 리스트를 반환한다") {
-                    val result = blogPostRepository.findAllByOrderBySequenceNumberAsc()
+                    val result = blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
                     result.shouldBeEmpty()
                 }
             }
@@ -51,22 +51,22 @@ class BlogPostRepositoryTest(
 
                     blogPostRepository.deleteAll()
 
-                    val result = blogPostRepository.findAllByOrderBySequenceNumberAsc()
+                    val result = blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
                     result.shouldBeEmpty()
                 }
             }
 
             `when`("하나의 포스트만 삭제하면") {
                 then("나머지 포스트들은 정상적으로 남아있다") {
-                    val posts = blogPostFixture.createRandomListAtLeastOne()
+                    val posts = blogPostFixture.createUniqueRandomListAtLeastOne()
                     val savedPosts = blogPostRepository.saveAll(posts)
                     val postToDelete = savedPosts.random()
 
                     blogPostRepository.delete(postToDelete)
 
-                    val remainingPosts = blogPostRepository.findAllByOrderBySequenceNumberAsc()
+                    val remainingPosts = blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
                     remainingPosts shouldHaveSize (savedPosts.size - 1)
-                    remainingPosts.none { it.id == postToDelete.id }
+                    remainingPosts.none { it.id == postToDelete.id } shouldBe true
                 }
             }
         }
