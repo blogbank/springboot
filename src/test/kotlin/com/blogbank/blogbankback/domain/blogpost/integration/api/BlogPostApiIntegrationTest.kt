@@ -56,7 +56,7 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
 
                     // When & Then
                     httpClient.postOkResponse<BlogPostListResponseDto>(uri) { body ->
-                        if (mockResponse == null) {
+                        if (!mockResponse.isSuccessful) {
                             body.posts shouldHaveSize 0
                             body.totalCount shouldBe 0
                         } else {
