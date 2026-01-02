@@ -102,7 +102,7 @@ class BlogPostManager(
         existingMap: Map<String, BlogPostEntity>
     ): List<BlogPostEntity> {
         return newEntities.map { newEntity ->
-            existingMap[newEntity.authorName]?.apply { updateFrom(newEntity) } ?: newEntity
+            existingMap[newEntity.authorName]?.updateFrom(newEntity) ?: newEntity
         }
     }
 }
