@@ -31,7 +31,7 @@ class BlogPostManager(
 
     // 모든 블로그 포스트를 조회함
     fun getAll(): List<BlogPostEntity> {
-        return blogPostRepository.findAllByOrderBySequenceNumberAsc()
+        return blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
     }
 
 
@@ -61,7 +61,7 @@ class BlogPostManager(
         }
 
         // 3. DB 조회 (Fallback)
-        return blogPostRepository.findAllByRoundNumberOrderBySequenceNumberAsc(roundNumber)
+        return blogPostRepository.findAllByRoundNumberAndIsDeletedFalseOrderBySequenceNumberAsc(roundNumber)
     }
 
     /**
@@ -92,7 +92,7 @@ class BlogPostManager(
 
     // 기존 엔티티들을 조회하여 authorName 기준으로 Map 반환함
     private fun fetchExistingEntitiesByAuthorName(roundNumber: Int): Map<String, BlogPostEntity> {
-        val existingEntities = blogPostRepository.findAllByRoundNumberOrderBySequenceNumberAsc(roundNumber)
+        val existingEntities = blogPostRepository.findAllByRoundNumberAndIsDeletedFalseOrderBySequenceNumberAsc(roundNumber)
         return existingEntities.associateBy { it.authorName }
     }
 
