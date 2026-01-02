@@ -33,7 +33,7 @@ class BlogPostApiIntegrationTest : BaseIntegrationTest() {
             `when`("GET /api/blog-posts 호출하면") {
                 then("모든 블로그 포스트 목록을 반환한다") {
                     // Given - 랜덤한 개수(0~10)의 테스트 데이터 저장
-                    val testPosts = blogPostFixture.createRandomList()
+                    val testPosts = blogPostFixture.createUnSavedRandomList()
                     val savedPosts = blogPostRepository.saveAll(testPosts)
 
                     // When & Then

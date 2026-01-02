@@ -34,7 +34,7 @@ class BlogPostServiceTest(
                 then("랜덤한 개수의 데이터에 대해 정상 처리한다 (0개부터 10개까지)") {
                     // Given - 0~10개 랜덤 생성
                     val roundNumber = (1..10).random()
-                    val mockEntities = blogPostFixture.createRandomListWithRound(roundNumber)
+                    val mockEntities = blogPostFixture.createUnSavedRandomListWithRound(roundNumber)
                     val expectedResponse = blogPostTestMapper.toListResponse(mockEntities)
 
                     every { blogPostManager.getBlogPostsWithCache(roundNumber) } returns mockEntities
@@ -67,7 +67,7 @@ class BlogPostServiceTest(
             `when`("getAllBlogPosts 호출 시") {
                 then("랜덤한 개수의 데이터에 대해 정상 처리한다 (0개부터 10개까지)") {
                     // Given - 0~10개 랜덤 생성
-                    val mockEntities = blogPostFixture.createRandomList()
+                    val mockEntities = blogPostFixture.createUnSavedRandomList()
                     val expectedResponse = blogPostTestMapper.toListResponse(mockEntities)
 
                     every { blogPostManager.getAll() } returns mockEntities

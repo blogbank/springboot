@@ -16,7 +16,7 @@ class BlogPostRepositoryTest(
         given("블로그 포스트 여러 개가 저장되어 있을 때") {
             `when`("순서번호 오름차순으로 조회하면") {
                 then("정렬되어 반환된다") {
-                    val blogPosts = blogPostFixture.createUniqueRandomListAtLeastOne()
+                    val blogPosts = blogPostFixture.createUnSavedUniqueRandomListAtLeastOne()
                     val savedPosts = blogPostRepository.saveAll(blogPosts)
 
                     val result = blogPostRepository.findAllByIsDeletedFalseOrderBySequenceNumberAsc()
@@ -46,7 +46,7 @@ class BlogPostRepositoryTest(
         given("여러 블로그 포스트가 저장되어 있을 때") {
             `when`("모든 데이터를 삭제하면") {
                 then("빈 리스트가 된다") {
-                    val posts = blogPostFixture.createRandomList()
+                    val posts = blogPostFixture.createUnSavedRandomList()
                     blogPostRepository.saveAll(posts)
 
                     blogPostRepository.deleteAll()
@@ -58,7 +58,7 @@ class BlogPostRepositoryTest(
 
             `when`("하나의 포스트만 삭제하면") {
                 then("나머지 포스트들은 정상적으로 남아있다") {
-                    val posts = blogPostFixture.createUniqueRandomListAtLeastOne()
+                    val posts = blogPostFixture.createUnSavedUniqueRandomListAtLeastOne()
                     val savedPosts = blogPostRepository.saveAll(posts)
                     val postToDelete = savedPosts.random()
 
