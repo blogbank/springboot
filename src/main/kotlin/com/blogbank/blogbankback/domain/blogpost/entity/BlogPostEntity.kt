@@ -14,6 +14,11 @@ data class BlogPostEntity(
     @Column(nullable = false)
     @NotNull
     @Min(1)
+    val roundNumber: Int,
+
+    @Column(nullable = false)
+    @NotNull
+    @Min(1)
     val sequenceNumber: Int,
 
     @Column(nullable = false)
@@ -31,5 +36,24 @@ data class BlogPostEntity(
 
     @Column(nullable = true)
     @Size(max = 500)
-    val memo: String?
-) : BaseEntity()
+    val memo: String?,
+
+    @Column(nullable = false)
+    val isDeleted: Boolean = false
+) : BaseEntity() {
+
+    // 다른 엔티티의 데이터로 현재 엔티티를 업데이트함 (ID는 유지)
+    fun updateFrom(other: BlogPostEntity): BlogPostEntity {
+        return this.copy(
+            sequenceNumber = other.sequenceNumber,
+            title = other.title,
+            link = other.link,
+            memo = other.memo
+        )
+    }
+
+    // 엔티티를 소프트 삭제함
+    fun softDelete(): BlogPostEntity {
+        return this.copy(isDeleted = true)
+    }
+}

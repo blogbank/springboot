@@ -11,9 +11,9 @@ class BlogPostController(
     private val blogPostService: BlogPostService
 ) {
 
-    @PostMapping("/collect/{roundNumber}")
-    fun collectBlogPosts(@PathVariable roundNumber: Int): ResponseEntity<BlogPostListResponseDto> {
-        val response = blogPostService.collectAndSaveBlogPosts(roundNumber)
+    @GetMapping("/rounds/{roundNumber}")
+    fun getBlogPostsForRound(@PathVariable roundNumber: Int): ResponseEntity<BlogPostListResponseDto> {
+        val response = blogPostService.getBlogPostsForRound(roundNumber)
         return ResponseEntity.ok(response)
     }
 
